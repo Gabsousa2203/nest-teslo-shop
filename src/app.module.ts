@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductsModule } from './products/products.module';
 import { CommonModule } from './common/common.module';
 import { SeedModule } from './seed/seed.module';
+import { FilesModule } from './files/files.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -20,11 +23,17 @@ import { SeedModule } from './seed/seed.module';
       synchronize: true, //* No se usa mucho en produccion, se usa mayormente una migracion
     }),
 
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), 
+    }),
+
     ProductsModule,
 
     CommonModule,
 
-    SeedModule
+    SeedModule,
+
+    FilesModule
   ],
 })
 export class AppModule {}
