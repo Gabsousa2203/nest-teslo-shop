@@ -9,6 +9,7 @@ import { Product, ProductImage } from './entities';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 import { validate as isUUID} from 'uuid'
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -27,7 +28,7 @@ export class ProductsService {
 
   ){}
   
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
     try{
 
       const { images = [], ...productDetails } = createProductDto;
@@ -35,6 +36,7 @@ export class ProductsService {
       const product = this.productRepository.create( {
         ...productDetails,
         images: images.map( image => this.productImageRepository.create({ url: image,  }) ),
+        user,
       } ); //* Esta funcion tiene 3 formas de usarse
 
       await this.productRepository.save( product );
@@ -91,7 +93,7 @@ export class ProductsService {
     }
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
     
     const { images, ...toUpdate } = updateProductDto;
     
@@ -111,6 +113,7 @@ export class ProductsService {
           image => this.productImageRepository.create({ url: image })
         )
       }
+      product.user = user;
       await queryRunner.manager.save( product ); //* Cuando usamos el manager no impacta todavia en la BD, es decir, no se hace el commit
       await queryRunner.commitTransaction(); //* Hacemos commit de todas las transacciones 
       await queryRunner.release(); //* Desactivamos el Query Runner
